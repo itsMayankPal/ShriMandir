@@ -30,13 +30,14 @@ const AuthModal = new mongoose.Schema({
     pooja:[
         {
             type:mongoose.Schema.Types.ObjectId,
-            ref:"pooja"
+            ref:"payment"
         }
     ],
     image:{
         type:String,
         
-    }
+    },
+   
 })
 
 module.exports = mongoose.model("user", AuthModal)

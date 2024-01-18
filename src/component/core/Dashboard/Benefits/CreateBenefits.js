@@ -5,11 +5,13 @@ import { apiConnector } from '../../../../Services/ApiConnector'
 import { benifitEndPoints } from '../../../../Services/AllApi'
 import { useSelector } from 'react-redux'
 import toast from 'react-hot-toast'
+import { useNavigate } from 'react-router-dom'
 
 const CreateBenefits = () => {
     const {register, setValue, handleSubmit, formState:{errors}}= useForm()
     const {token} = useSelector((state)=> state.auth)
     const {CREATE_BENEFITS_API}= benifitEndPoints
+    const navigate = useNavigate()
     const onSubmit = async(data)=>{
         const {icon, title, description} = data
         const toastid = toast.loading("Please wait..")
@@ -19,10 +21,7 @@ const CreateBenefits = () => {
                 Authorization:`Bearer ${token}`
             })
             toast.success("Benefit created")
-            setValue("icon", "")
-            setValue("description", "")
-            setValue("title", "")
-            
+            navigate("/dashboard/my-benifits")
         } catch (error) {
             console.log(error)
         }
@@ -31,8 +30,8 @@ const CreateBenefits = () => {
     }
   return (
     <div className=' w-full flex items-center justify-center flex-col gap-4'>
-        <h1 className=' text-3xl font-bold uppercase'>Add Benefits here</h1>
-        <form className=' w-[40%] flex flex-col gap-3 p-3' onSubmit={handleSubmit(onSubmit)}>
+        <h1 className=' text-xl lg:text-3xl font-bold uppercase'>Add Benefits here</h1>
+        <form className=' w-full lg:w-[40%] flex flex-col gap-3 p-3' onSubmit={handleSubmit(onSubmit)}>
         <div>
             <ImageUpload setValue={setValue} register={register} errors={errors} name={"icon"} label={"Add icon"} />
         </div>

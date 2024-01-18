@@ -37,12 +37,12 @@ const Step1 = () => {
         </div>
         <div className=" flex flex-col gap-2 px-2">
           <label className=" text-orange-500 font-semibold">
-            Enter description<sup className=" text-red-500 text-sm">*</sup>
+            Enter about pooja<sup className=" text-red-500 text-sm">*</sup>
           </label>
           <textarea
             type="text"
             className=" w-full border-2 border-orange-500  rounded-xl p-2 min-h-40"
-            placeholder="Enter description here"
+            placeholder="Enter about pooja here"
             {...register("description", { required: true })}
           />
           {errors.description && (
@@ -61,6 +61,20 @@ const Step1 = () => {
           />
           {errors.address && (
             <span className=" text-red-500">Address is required</span>
+          )}
+        </div>
+        <div className=" flex flex-col gap-2 px-2">
+          <label className=" text-orange-500 font-semibold">
+            Enter temple name<sup className=" text-red-500 text-sm">*</sup>
+          </label>
+          <input
+            type="text"
+            className=" w-full border-2 border-orange-500  rounded-xl p-2"
+            placeholder="Enter temple name here"
+            {...register("templeName", { required: true })}
+          />
+          {errors.templeName && (
+            <span className=" text-red-500">Temple Name is required</span>
           )}
         </div>
         <div className=" flex flex-col gap-2 px-2">
@@ -112,7 +126,7 @@ const Step1 = () => {
             Enter date<sup className=" text-red-500 text-sm">*</sup>
           </label>
           <input
-            type="date"
+            type="datetime-local"
             className=" w-full border-2 border-orange-500  rounded-xl p-2"
             placeholder="Enter date of pooja start "
             {...register("date", { required: true })}

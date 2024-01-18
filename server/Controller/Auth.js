@@ -4,8 +4,9 @@ const bcyrpt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const otpGenerator = require("otp-generator");
 const { uploadImageToCloudinary } = require("../Utils/uploadImage");
+let validator = require('email-validator') 
 
-exports.signUp = async (req, res) => {
+exports.signUp = async (req, res) => { 
   try {
     const {
       fullName,
@@ -16,7 +17,6 @@ exports.signUp = async (req, res) => {
       otp,
       accountType,
     } = req.body;
-    console.log(password, confirmPassword)
 
     const existingUser = await User.findOne({ email });
     if (existingUser) {
@@ -29,7 +29,7 @@ exports.signUp = async (req, res) => {
     if (password !== confirmPassword) {
       return res.status(200).json({
         success: false,
-        message: "Password do not match",
+        message: "Password do not match", 
       });
     }
 
@@ -77,8 +77,9 @@ exports.signUp = async (req, res) => {
 exports.sendOtp = async (req, res) => {
   try {
     const { email } = req.body;
-    console.log(email)
-    const checkUser = await Otp.findOne({ email });
+
+    const checkUser = await User.findOne({ email:email });
+    console.log(checkUser)
     if (checkUser) {
       return res.status(400).json({
         success: false,
@@ -124,7 +125,7 @@ exports.login = async (req, res) => {
     let user = await User.findOne({ email });
 
     if (!user) {
-      res.json({
+     return res.json({
         success: false,
         message: "User not found",
       });
@@ -141,7 +142,6 @@ exports.login = async (req, res) => {
         expiresIn: "24h",
       });
 
-      user = user.toObject();
       user.token = token;
       user.password = undefined;
       const options = {
@@ -155,14 +155,14 @@ exports.login = async (req, res) => {
         message: "User logged in successfully",
       });
     } else {
-      res.status(401).json({
+     return res.status(401).json({
         success: false,
-        message: "Password do not matched",
+        message: "Password is incorrect",
       });
     }
   } catch (error) {
     console.error(error);
-    return res.status(500).json({
+    return res.status(500).json({ 
       success: false,
       message: `Login Failure Please Try Again`,
     });
@@ -191,19 +191,17 @@ exports.updateProfileImage = async(req, res)=>{
     }
 }
 
-exports.updateProfile = async(req, res)=>{
+exports.updatePhoneNum = async(req, res)=>{
     try {
-        const {fullName, email, phoneNum} = req.body
+        const {phoneNum} = req.body
         const userId = req.user.id 
-        const updateProfile = await User.findById({_id:userId}, {
-            fullName:fullName,
-            email:email,
+        const updateProfile = await User.findByIdAndUpdate({_id:userId}, {
             phoneNum:phoneNum
-        })
+        },{new:true})
 
         return res.status(200).json({
             success:true,
-            message:"Profile updated successfully"
+            message:"Profile number successfully"
         })
         
     } catch (error) {
@@ -219,7 +217,13 @@ exports.updateProfile = async(req, res)=>{
 exports.getuserDetailById = async(req, res)=>{
     try {
         const userId = req.user.id
-        const userDetails = await User.findById({_id:userId})
+        const userDetails = await User.findById({ _id: userId })
+        .populate([
+          { path: "pooja", populate: { path: "packageId" } },
+          { path: "pooja", populate: { path: "poojaId" } },
+          { path: "pooja", populate: { path: "offeringItem" } }
+        ])
+        .exec();
         return res.status(200).json({
             success:true,
             data:userDetails
@@ -233,3 +237,33 @@ exports.getuserDetailById = async(req, res)=>{
         });
     }
 }
+
+exports.changePassword = async(req, res)=>{
+  try {
+    const {oldPassword, newPassword} = req.body
+    const userId = req.user.id
+    const user = await User.findById(userId)
+    const checkPassword = await bcyrpt.compare(oldPassword, user.password)
+    if(!checkPassword){
+      return res.status(400).json({
+        success:false,
+        message:"Old Password do not match"
+      })
+    }
+    const encryptedPassword = await bcyrpt.hash(newPassword, 10)
+    const updateNewPass = await User.findByIdAndUpdate({_id:userId}, {
+      password:encryptedPassword
+    }, {new:true})
+
+    return res.status(200).json({
+      success:true, message:"Password changed"
+    })
+    
+  } catch (error) {
+    console.error(error);
+        return res.status(500).json({
+          success: false,
+          message: error.message,
+        });
+  }
+} 
